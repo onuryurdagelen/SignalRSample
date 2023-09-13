@@ -1,6 +1,8 @@
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using SignalRSample.Data;
 using SignalRSample.Hubs;
+using SignalRSample.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -10,6 +12,18 @@ builder.Services.AddSignalR();
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
 {
     options.UseNpgsql(builder.Configuration.GetConnectionString("Npgsql"));
+});
+builder.Services.AddDefaultIdentity<ApplicationUser>(options =>
+    options.SignIn.RequireConfirmedAccount = false)
+    .AddEntityFrameworkStores<ApplicationDbContext>();
+builder.Services.Configure<IdentityOptions>(options =>
+{
+    options.Password.RequireDigit = true;
+    options.Password.RequireLowercase =true;
+    options.Password.RequireNonAlphanumeric = true;
+    options.Password.RequireUppercase = true;
+    options.Password.RequiredLength = 6;
+    options.Password.RequiredUniqueChars = 1;
 });
 var app = builder.Build();
 
@@ -25,7 +39,7 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
-
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllerRoute(
@@ -33,5 +47,9 @@ app.MapControllerRoute(
     pattern: "{controller=Home}/{action=Index}/{id?}");
 
 app.MapHub<UserHub>("/hubs/userCount");
+
+var context = app.Services.GetRequiredService<ApplicationDbContext>();
+
+context.Database.Migrate();
 
 app.Run();
