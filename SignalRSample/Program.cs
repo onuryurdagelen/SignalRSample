@@ -48,8 +48,8 @@ app.MapControllerRoute(
 
 app.MapHub<UserHub>("/hubs/userCount");
 
-var context = app.Services.GetRequiredService<ApplicationDbContext>();
+//var context = app.Services.GetRequiredService<ApplicationDbContext>();
 
-context.Database.Migrate();
+//context.Database.Migrate();
 
 app.Run();

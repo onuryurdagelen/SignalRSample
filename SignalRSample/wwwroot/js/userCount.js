@@ -1,7 +1,8 @@
 ﻿//create connection
 var connectionUserCount = new signalR
     .HubConnectionBuilder()
-    .withUrl("/hubs/userCount")
+    .configureLogging(signalR.LogLevel.Trace)
+    .withUrl("/hubs/userCount",signalR.HttpTransportType.WebSockets)
     .build();
 
 //connect to methods that hub invokes aka(also known as) receive notifications from hub
@@ -11,14 +12,14 @@ connectionUserCount.on('updateTotalUserViews', (value) => {
 })
 
 connectionUserCount.on('updateTotalUsers', (value) => {
-    console.log(value);
     let newCountSpan = document.getElementById('totalUsersCounter');
     newCountSpan.textContent = value.toString();
 });
 
 //invoke hub methods aka(also known as) send notification to hub
 function newWindowLoadedOnClient() {
-    connectionUserCount.send("NewWindowLoadedAsync");
+    //To get values that invokes from here we must call the invoke method
+    connectionUserCount.invoke("NewWindowLoadedAsync","Onur").then((value) =>console.log(value));
 }
 //document.addEventListener('DOMContentLoaded', function () {
 //    newWindowLoadedOnClient();
